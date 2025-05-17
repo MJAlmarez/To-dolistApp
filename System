@@ -1,0 +1,81 @@
+import tkinter as tk
+from tkinter import messagebox
+
+class TodoApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("To-Do List App (Stack/Queue)")
+        self.root.geometry("400x500")
+        self.root.configure(bg="light blue")  
+        self.mode = tk.StringVar(value="Stack") 
+        self.tasks = []
+
+        tk.Label(root, text="To-Do List App", font=("Arial", 18, "bold"), bg="light blue", fg="dark blue").pack(pady=10)
+
+        tk.Label(root, text="Mode:", bg="light blue", fg="dark blue", font=("Arial", 10, "bold")).pack()
+        mode_menu = tk.OptionMenu(root, self.mode, "Stack", "Queue")
+        mode_menu.config(bg="white", fg="black", font=("Arial", 10))
+        mode_menu.pack()
+
+        self.entry = tk.Entry(root, width=30, font=("Arial", 12))
+        self.entry.pack(pady=10)
+
+        tk.Button(root, text="Add Task", command=self.add_task, bg="green", fg="white", font=("Arial", 10, "bold")).pack(pady=5)
+        tk.Button(root, text="Remove Task", command=self.remove_task, bg="blue", fg="white", font=("Arial", 10, "bold")).pack(pady=5)
+        tk.Button(root, text="Clear All", command=self.clear_tasks, bg="orange", fg="white", font=("Arial", 10, "bold")).pack(pady=5)
+
+        self.task_display = tk.Listbox(root, width=45, height=10, font=("Courier", 10), bg="white", fg="black")
+        self.task_display.pack(pady=10)
+
+        self.status = tk.Label(root, text="Mode: Stack (LIFO)", fg="gray", bg="light blue", font=("Arial", 10, "italic"))
+        self.status.pack(pady=5)
+
+        tk.Button(root, text="Exit", fg="white", bg="red", font=("Arial", 10, "bold"), command=self.confirm_exit).pack(pady=10)
+
+        self.mode.trace_add("write", self.update_mode)
+
+    def add_task(self):
+        task = self.entry.get().strip()
+        if task:
+            self.tasks.append(task)
+            self.update_display()
+            self.entry.delete(0, tk.END)
+        else:
+            messagebox.showwarning("Input Error", "Please enter a task.")
+
+    def remove_task(self):
+        if self.tasks:
+            if self.mode.get() == "Stack":
+                removed = self.tasks.pop()
+            else:  # Queue
+                removed = self.tasks.pop(0)
+            self.update_display()
+            messagebox.showinfo("Task Removed", f"Removed: {removed}")
+        else:
+            messagebox.showinfo("No Tasks", "There are no tasks to remove.")
+
+    def clear_tasks(self):
+        self.tasks.clear()
+        self.update_display()
+
+    def update_display(self):
+        self.task_display.delete(0, tk.END)
+        for idx, task in enumerate(self.tasks):
+            self.task_display.insert(tk.END, f"{idx+1}. {task}")
+
+    def update_mode(self, *args):
+        mode = self.mode.get()
+        if mode == "Stack":
+            self.status = tk.Label(root, text="Mode: Stack (LIFO)", fg="gray", bg="light blue", font=("Arial", 10, "bold"))
+        else:
+           self.status = tk.Label(root, text="Mode: Stack (FIFO)", fg="gray", bg="light blue", font=("Arial", 10, "bold"))
+
+    def confirm_exit(self):
+        answer = messagebox.askyesno("Exit Confirmation", "Are you sure you want to exit?")
+        if answer:
+            self.root.destroy()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = TodoApp(root)
+    root.mainloop()
